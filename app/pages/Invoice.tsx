@@ -1,18 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import InvoiceForm from "../components/InvoiceForm";
-import InvoiceDetails from "../components/InvoiceDetails";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { banks } from "../utils/banks";
+import { invoiceSchema } from "../utils/schemas";
+
+const InvoiceDetails = dynamic(() => import("../components/InvoiceDetails"), {
+  ssr: false,
+});
 
 export default function Invoice() {
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm({
+  const { handleSubmit, watch, setValue, formState, register } = useForm({
     defaultValues: {
       organizationName: "",
       recipient: "",
@@ -25,6 +25,8 @@ export default function Invoice() {
       total: 0,
       image: null,
     },
+    resolver: yupResolver(invoiceSchema),
+    mode: "all",
   });
 
   const [
@@ -54,7 +56,7 @@ export default function Invoice() {
   return (
     <main className="bg-[#E9EDF2] min-h-lvh">
       <div className="container max-w-[1024px] mx-auto px-4 py-8">
-        <div className="grid grid-cols-[7fr_5fr] gap-4">
+        <div className="lg:grid lg:grid-cols-[7fr_5fr] lg:gap-4">
           <div>
             <InvoiceDetails
               data={{
@@ -83,10 +85,11 @@ export default function Invoice() {
                 bg,
                 terms,
                 total,
-                control,
                 setValue,
-                errors,
+                errors: formState.errors,
                 image,
+                handleSubmit,
+                register,
               }}
             />
           </div>

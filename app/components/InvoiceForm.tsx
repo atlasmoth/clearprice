@@ -1,11 +1,47 @@
+"use client";
+
+import { useState } from "react";
 import { banks } from "../utils/banks";
-import { Controller } from "react-hook-form";
 import { ArrowUpOnSquareIcon } from "@heroicons/react/20/solid";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { headers } from "next/headers";
+
 export default function InvoiceForm({ data }: { data: any }) {
-  const { fontFamily, color, bg, control, errors, setValue, image } = data;
+  const {
+    fontFamily,
+    color,
+    bg,
+    errors,
+    setValue,
+    image,
+    handleSubmit,
+    register,
+  } = data;
+  const [loading, setLoading] = useState(false);
 
   return (
-    <form className="bg-[#fff] p-4 rounded-xl overflow-y-scroll max-h-[100vh] pb-10">
+    <form
+      className="bg-[#fff] p-4 rounded-xl overflow-y-scroll lg:max-h-[100vh] pb-10"
+      onSubmit={handleSubmit((d: any) => {
+        if (loading) return;
+        setLoading(true);
+        const submitData = async () => {
+          await fetch("/api/v1/invoice/templates", {
+            method: "POST",
+            body: JSON.stringify(d),
+            headers: { "Content-Type": "Application/json" },
+          });
+          setLoading(false);
+        };
+        toast.promise(submitData, {
+          pending: "Processing...",
+          success: "Submitted 👌",
+          error: "Something went wrong",
+        });
+      })}
+    >
+      <ToastContainer />
       <h4>Create New Invoice</h4>
       <div className="mt-4">
         <p>Logo</p>
@@ -40,186 +76,104 @@ export default function InvoiceForm({ data }: { data: any }) {
         </div>
       </div>
       <div className="mt-4">
-        <Controller
-          control={control}
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <label htmlFor="organizationName">
-              <p>Organization</p>
+        <label htmlFor={"organizationName"}>
+          <p>Organization</p>
 
-              <input
-                type="text"
-                className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
-                placeholder="Organization name"
-                required
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-              />
-            </label>
-          )}
-          name="organizationName"
-        />
+          <input
+            type="text"
+            className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
+            placeholder="Organization name"
+            required
+            name={"organizationName"}
+            {...register("organizationName")}
+          />
+        </label>
         {errors.organizationName && (
           <p className="text-red-500">Please enter valid orgnization name</p>
         )}
       </div>
       <div className="mt-4">
-        <Controller
-          control={control}
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <label htmlFor="recipient">
-              <p>Recipient</p>
-              <input
-                type="text"
-                className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
-                placeholder="Recipient name"
-                required
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-              />
-            </label>
-          )}
-          name="recipient"
-        />
+        <label htmlFor="recipient">
+          <p>Recipient</p>
+          <input
+            type="text"
+            className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
+            placeholder="Recipient name"
+            required
+            {...register("recipient")}
+          />
+        </label>
         {errors.recipient && (
           <p className="text-red-500">Please enter valid recipient</p>
         )}
       </div>
       <div className="mt-4">
-        <Controller
-          control={control}
-          rules={{
-            required: true,
-            min: 0,
-            pattern: {
-              value: new RegExp(/^[1-9]\d*$/),
-              message: "Enter valid amount",
-            },
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <label htmlFor="total">
-              <p>Total</p>
-              <input
-                type="number"
-                className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
-                placeholder="Enter amount"
-                required
-                min={0}
-                onBlur={onBlur}
-                onChange={(e) => {
-                  setValue("total", Number(e.target.value));
-                }}
-                value={Number(value).toString()}
-              />
-            </label>
-          )}
-          name="total"
-        />
+        <label htmlFor="total">
+          <p>Total</p>
+          <input
+            type="number"
+            className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
+            placeholder="Enter amount"
+            required
+            min={0}
+            {...register("total")}
+          />
+        </label>
         {errors.total && (
           <p className="text-red-500">Please enter valid amount</p>
         )}
       </div>
       <div className="mt-4">
-        <Controller
-          control={control}
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <label htmlFor="bank">
-              <p>Select bank</p>
-              <select
-                name="bank"
-                id="bank"
-                className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
-                required
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-              >
-                <option>Choose bank</option>
-                {banks.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          name="bank"
-        />
-        {errors.recipient && (
+        <label htmlFor="bank">
+          <p>Select bank</p>
+          <select
+            name="bank"
+            id="bank"
+            className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
+            required
+            {...register("bank")}
+          >
+            <option>Choose bank</option>
+            {banks.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {errors.bank && (
           <p className="text-red-500">Please select valid bank</p>
         )}
       </div>
       <div className="mt-4">
-        <Controller
-          control={control}
-          rules={{
-            required: true,
-            pattern: {
-              value: new RegExp(/^[1-9]\d*$/),
-              message: "Enter valid amount",
-            },
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <label htmlFor="bankAccount">
-              <p>Account number</p>
-              <input
-                type="text"
-                className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
-                placeholder="Enter account number"
-                required
-                min={0}
-                minLength={10}
-                maxLength={10}
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-              />
-            </label>
-          )}
-          name="accountNumber"
-        />
-        {errors.total && (
+        <label htmlFor="bankAccount">
+          <p>Account number</p>
+          <input
+            type="text"
+            className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
+            placeholder="Enter account number"
+            required
+            min={0}
+            minLength={10}
+            maxLength={10}
+            {...register("accountNumber")}
+          />
+        </label>
+        {errors.accountNumber && (
           <p className="text-red-500">Please enter valid account number</p>
         )}
       </div>
       <div className="mt-4">
-        <Controller
-          control={control}
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <label htmlFor="terms">
-              <p>Terms</p>
-              <textarea
-                className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%] pt-2"
-                placeholder="Enter terms"
-                required
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-              />
-              {errors.terms && (
-                <p className="text-red-500">Please enter terms</p>
-              )}
-            </label>
-          )}
-          name="terms"
-        />
+        <label htmlFor="terms">
+          <p>Terms</p>
+          <textarea
+            className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%] pt-2"
+            placeholder="Enter terms"
+            required
+            {...register("terms")}
+          />
+          {errors.terms && <p className="text-red-500">Please enter terms</p>}
+        </label>
       </div>
 
       <div className="flex items-center justify-between mt-4">
@@ -290,6 +244,14 @@ export default function InvoiceForm({ data }: { data: any }) {
           <p className="mt-1 text-sm">Bg color</p>
         </div>
       </div>
+
+      <button
+        disabled={loading}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:shadow-outline mt-4"
+        type="submit"
+      >
+        Submit
+      </button>
     </form>
   );
 }

@@ -1,83 +1,13 @@
-import { useState } from "react";
-const sample = ` <article
-    style="
-      font-family: {{fontFamily}};
-      line-height: 1.6;
-      color: {{color}};
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background : {{bg}};
-    "
-  >
-    <header style="text-align: center; margin-bottom: 20px">
-      <img src="{{image}}" alt="Company Logo" height="100" width="100" style="border-radius: 20px;" />
-      <h1>{{organizationName}}</h1>
-    </header>
+"use client";
 
-    <main>
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 20px;
-        "
-      >
-        <div>
-          <h2>Invoice</h2>
-          <p><strong>Date:</strong> {{date}}</p>
-          <p><strong>Invoice Number:</strong> {{invoiceNumber}}</p>
-        </div>
-        <div>
-          <h3>Bill To:</h3>
-          <p>{{recipient}}</p>
-        </div>
-      </div>
+import { useEffect, useState } from "react";
 
-      <table
-        style="width: 100%; border-collapse: collapse; margin-bottom: 20px"
-      >
-        <thead>
-          <tr style="background-color: #f2f2f2">
-            <th style="border: 1px solid #ddd; padding: 10px; text-align: left">
-              Terms
-            </th>
-            <th
-              style="border: 1px solid #ddd; padding: 10px; text-align: right"
-            >
-              Amount
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="border: 1px solid #ddd; padding: 10px">{{terms}}</td>
-            <td
-              style="border: 1px solid #ddd; padding: 10px; text-align: right"
-            >
-             ₦{{total}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div style="margin-bottom: 20px">
-        <h3>Payment Details:</h3>
-        <p><strong>Bank Name:</strong>{{bank}}</p>
-        <p><strong>Account Number:</strong>{{accountNumber}}</p>
-      </div>
-    </main>
-
-    <footer
-      style="
-        text-align: center;
-        margin-top: 20px;
-        font-size: 0.9em;        
-      "
-    >
-      <p>Thank you for your business!</p>
-    </footer>
-  </article>`;
+interface Template {
+  Id: string;
+  Name: string;
+  Version: string;
+  Content: string;
+}
 
 export default function InvoiceDetails({ data }: { data: any }) {
   const {
@@ -92,9 +22,10 @@ export default function InvoiceDetails({ data }: { data: any }) {
     recipient,
     bank,
   } = data;
-  console.log(image);
-  const [currentTemplate, setCurrentTemplate] = useState(sample);
-  const finalData = currentTemplate
+
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [currentTemplateId, setCurrentTemplateId] = useState(0);
+  const finalData = (templates[currentTemplateId]?.Content || "")
     .replace("{{image}}", image)
     .replace("{{terms}}", terms)
     .replace("{{organizationName}}", organizationName)
@@ -102,16 +33,43 @@ export default function InvoiceDetails({ data }: { data: any }) {
     .replace("{{date}}", new Intl.DateTimeFormat("en-GB").format(new Date()))
     .replace("{{accountNumber}}", accountNumber)
     .replace("{{recipient}}", recipient)
-    .replace("{{invoiceNumber}}", Math.round(Math.random() * 1000).toString())
+    .replace(
+      "{{invoiceNumber}}",
+      new Intl.DateTimeFormat("en-GB", { hour: "numeric" }).format(new Date())
+    )
     .replace("{{color}}", color)
     .replace("{{fontFamily}}", fontFamily)
     .replace("{{bg}}", bg)
     .replace("{{bank}}", bank);
-  console.log(image);
+
+  useEffect(() => {
+    fetch("/api/v1/invoice/templates")
+      .then((t) => t.json())
+      .then((t) => {
+        setTemplates(t.data);
+      })
+      .catch(console.log);
+  }, []);
+
   return (
-    <div
-      className="bg-[#fff] p-4 rounded-xl"
-      dangerouslySetInnerHTML={{ __html: finalData }}
-    ></div>
+    <div className="bg-[#fff] p-4 rounded-xl lg:max-h-[100vh] mb-4">
+      <div className="flex mb-4">
+        <p>Template: &nbsp; </p>
+        <select
+          name="template"
+          value={currentTemplateId}
+          onChange={(e) => {
+            setCurrentTemplateId(Number(e.target.value));
+          }}
+        >
+          {templates.map((t, index) => (
+            <option value={index} key={t.Id}>
+              {t.Name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div dangerouslySetInnerHTML={{ __html: finalData }}></div>
+    </div>
   );
 }
