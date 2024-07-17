@@ -5,9 +5,9 @@ import { banks } from "../utils/banks";
 import { ArrowUpOnSquareIcon } from "@heroicons/react/20/solid";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { headers } from "next/headers";
+import { InvoiceFormData } from "../utils/interfaces";
 
-export default function InvoiceForm({ data }: { data: any }) {
+export default function InvoiceForm({ data }: { data: InvoiceFormData }) {
   const {
     fontFamily,
     color,
@@ -46,7 +46,7 @@ export default function InvoiceForm({ data }: { data: any }) {
       <div className="mt-4">
         <p>Logo</p>
         <div className="border-dashed w-[100px] h-[100px] border-2 mt-2 flex items-center justify-center relative overflow-hidden rounded-xl cursor-pointer panel-parent">
-          {image ? (
+          {image.length > 0 ? (
             <img
               src={image}
               alt="Logo"
@@ -55,12 +55,13 @@ export default function InvoiceForm({ data }: { data: any }) {
           ) : null}
           <div
             className={`absolute top-0 bottom-0 z-20 flex items-center justify-center bg-[rgba(0,0,0,0.5)] left-0 right-0 ${
-              image ? "panel" : ""
+              image.length > 0 ? "panel" : ""
             }`}
           >
             <ArrowUpOnSquareIcon color="rgba(255,255,255,0.9)" width={60} />
           </div>
           <input
+            data-testid="file-input"
             type="file"
             accept="image/*"
             className="opacity-0 absolute top-0 bottom-0 left-0 right-0 z-30"
@@ -80,16 +81,16 @@ export default function InvoiceForm({ data }: { data: any }) {
           <p>Organization</p>
 
           <input
+            data-testid="orgnizationName"
             type="text"
             className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
             placeholder="Organization name"
             required
-            name={"organizationName"}
             {...register("organizationName")}
           />
         </label>
         {errors.organizationName && (
-          <p className="text-red-500">Please enter valid orgnization name</p>
+          <p className="text-red-500">Please enter valid organization name</p>
         )}
       </div>
       <div className="mt-4">
@@ -127,7 +128,7 @@ export default function InvoiceForm({ data }: { data: any }) {
         <label htmlFor="bank">
           <p>Select bank</p>
           <select
-            name="bank"
+            data-testid="combobox"
             id="bank"
             className="mt-2 bg-[#F8F9FD] px-4 rounded-lg h-[40px] w-[100%]"
             required
@@ -188,6 +189,7 @@ export default function InvoiceForm({ data }: { data: any }) {
               type="color"
               className="invisible absolute top-0 bottom-0 left-0 right-0"
               id="color"
+              data-testid="color"
               name="color"
               value={color}
               onChange={(e) => {
@@ -208,6 +210,7 @@ export default function InvoiceForm({ data }: { data: any }) {
           <select
             id="fontfamily"
             name="fontfamily"
+            data-testid="fontfamily"
             value={fontFamily}
             onChange={(e) => {
               setValue("fontFamily", e.target.value);
@@ -234,6 +237,7 @@ export default function InvoiceForm({ data }: { data: any }) {
               className="invisible absolute top-0 bottom-0 left-0 right-0"
               id="bgcolor"
               name="bgcolor"
+              data-testid="bgcolor"
               value={bg}
               onChange={(e) => {
                 setValue("bg", e.target.value);
@@ -249,6 +253,7 @@ export default function InvoiceForm({ data }: { data: any }) {
         disabled={loading}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:shadow-outline mt-4"
         type="submit"
+        data-testid="submit"
       >
         Submit
       </button>

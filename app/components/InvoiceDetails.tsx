@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { InvoiceFormData } from "../utils/interfaces";
 
 interface Template {
   Id: string;
@@ -9,7 +10,14 @@ interface Template {
   Content: string;
 }
 
-export default function InvoiceDetails({ data }: { data: any }) {
+export default function InvoiceDetails({
+  data,
+}: {
+  data: Omit<
+    InvoiceFormData,
+    "errors" | "setValue" | "handleSubmit" | "register"
+  >;
+}) {
   const {
     fontFamily,
     color,

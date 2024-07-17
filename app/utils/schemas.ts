@@ -5,8 +5,14 @@ export const invoiceSchema = yup
   .shape({
     organizationName: yup
       .string()
+      .trim()
+      .min(1)
       .required("Please enter valid organization name"),
-    recipient: yup.string().required("Please enter valid recipient"),
+    recipient: yup
+      .string()
+      .trim()
+      .min(1)
+      .required("Please enter valid recipient"),
     total: yup
       .number()
       .typeError("Please enter valid amount")
@@ -22,7 +28,7 @@ export const invoiceSchema = yup
       .matches(/^[0-9]\d*$/, "Please enter valid account number")
       .length(10, "Account number must be 10 digits")
       .required("Please enter valid account number"),
-    terms: yup.string().required("Please enter terms"),
+    terms: yup.string().trim().min(1).required("Please enter terms"),
     fontFamily: yup.string().required(),
     color: yup.string().required(),
     bg: yup.string().required(),

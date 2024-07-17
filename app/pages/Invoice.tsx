@@ -23,7 +23,7 @@ export default function Invoice() {
       bg: "#ffffff",
       terms: "",
       total: 0,
-      image: null,
+      image: "",
     },
     resolver: yupResolver(invoiceSchema),
     mode: "all",
